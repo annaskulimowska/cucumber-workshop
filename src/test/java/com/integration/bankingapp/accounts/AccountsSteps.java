@@ -79,4 +79,26 @@ public class AccountsSteps {
 
         assertEquals(expectedAccounts, responseAccounts);
     }
+
+    @When("user is viewing details of account {string}")
+    public void user_is_viewing_details_of_account(String accountNumber) throws IOException {
+        executeRequest("/accounts/" + accountNumber);
+    }
+
+    @Then("user should see account details")
+    public void user_should_see_account_details(DataTable dataTable) throws IOException {
+        Map<String, String> expectedData = dataTable.asMaps().get(0);
+        Account expectedAccount = new Account(expectedData.get("accountNumber"), expectedData.get("iban"), expectedData.get("balanceWithCurrency"));
+
+        InputStream content = lastResponse.getEntity().getContent();
+        Account actualAccount = objectMapper.readValue(content, Account.class);
+
+        assertEquals(expectedAccount, actualAccount);
+    }
+
+    @Then("user should get error with HTTP status {string}")
+    public void userShouldGetErrorWithHTTPStatus(String expectedHttpCode) {
+        int actualHttpCode = lastResponse.getStatusLine().getStatusCode();
+        assertEquals(expectedHttpCode, String.valueOf(actualHttpCode));
+    }
 }
